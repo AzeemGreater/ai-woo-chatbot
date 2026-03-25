@@ -20,7 +20,7 @@ class AIWC_REST_API {
 		register_rest_route( self::NAMESPACE, '/chat', array(
 			'methods'             => WP_REST_Server::CREATABLE,
 			'callback'            => array( $this, 'handle_chat' ),
-			'permission_callback' => array( $this, 'public_permission' ),
+			'permission_callback' => array( $this, 'rate_limited_permission' ),
 			'args'                => array(
 				'session_id' => array( 'required' => true, 'sanitize_callback' => 'sanitize_text_field' ),
 				'message'    => array( 'required' => true, 'sanitize_callback' => 'sanitize_textarea_field' ),
@@ -53,7 +53,7 @@ class AIWC_REST_API {
 		register_rest_route( self::NAMESPACE, '/order/track', array(
 			'methods'             => WP_REST_Server::READABLE,
 			'callback'            => array( $this, 'handle_order_track' ),
-			'permission_callback' => array( $this, 'public_permission' ),
+			'permission_callback' => array( $this, 'order_track_permission' ),
 		) );
 
 		// Lead capture
@@ -201,9 +201,76 @@ class AIWC_REST_API {
 		return true;
 	}
 
+	/**
+	 * Rate-limited public permission: max 30 requests per minute per IP.
+	 * Uses WordPress transients keyed by hashed IP address.
+	 */
+	public function rate_limited_permission( WP_REST_Request $request ): bool|WP_Error {
+		$ip         = $this->get_client_ip();
+		$key        = 'aiwc_rl_' . md5( $ip );
+		$window     = 60;   // seconds
+		$max_req    = 30;
+
+		$raw_count = get_transient( $key );
+		if ( $raw_count === false ) {
+			set_transient( $key, 1, $window );
+		} elseif ( (int) $raw_count >= $max_req ) {
+			return new WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many requests. Please wait a moment before trying again.', 'ai-woo-chatbot' ),
+				array( 'status' => 429 )
+			);
+		} else {
+			set_transient( $key, (int) $raw_count + 1, $window );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Order tracking requires either a valid REST nonce (logged-in user)
+	 * or a billing email to be provided (guest verification).
+	 */
+	public function order_track_permission( WP_REST_Request $request ): bool|WP_Error {
+		// Logged-in users with a valid nonce may proceed without email.
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( $nonce && wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return true;
+		}
+
+		// Guests must supply an email address for identity verification.
+		$email = sanitize_email( $request->get_param( 'email' ) ?? '' );
+		if ( is_email( $email ) ) {
+			return true;
+		}
+
+		return new WP_Error(
+			'order_track_unauthorized',
+			__( 'Please provide your billing email address to track your order.', 'ai-woo-chatbot' ),
+			array( 'status' => 401 )
+		);
+	}
+
 	/** Require a valid REST nonce for write operations that touch the cart. */
 	public function nonce_permission( WP_REST_Request $request ): bool {
 		$nonce = $request->get_header( 'X-WP-Nonce' );
 		return (bool) wp_verify_nonce( $nonce, 'wp_rest' );
+	}
+
+	/**
+	 * Retrieve the real client IP, accounting for common proxy headers.
+	 * Uses REMOTE_ADDR as the authoritative fallback.
+	 */
+	private function get_client_ip(): string {
+		foreach ( array( 'HTTP_CF_CONNECTING_IP', 'HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP' ) as $header ) {
+			if ( ! empty( $_SERVER[ $header ] ) ) {
+				// X-Forwarded-For may be a comma-separated list; use the first entry.
+				$ip = trim( explode( ',', sanitize_text_field( wp_unslash( $_SERVER[ $header ] ) ) )[0] );
+				if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+					return $ip;
+				}
+			}
+		}
+		return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0' ) );
 	}
 }

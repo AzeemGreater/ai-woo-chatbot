@@ -68,8 +68,8 @@ class AIService:
 
         messages: list[dict[str, str]] = [{"role": "system", "content": system_content}]
 
-        # Append conversation history (last 10 turns to stay within token limits)
-        for msg in history[-10:]:
+        # Append conversation history (last N turns to stay within token limits)
+        for msg in history[-settings.max_history_messages:]:
             messages.append({"role": msg.role, "content": msg.content})
 
         messages.append({"role": "user", "content": user_message})
@@ -79,7 +79,7 @@ class AIService:
                 model=settings.openai_model,
                 messages=messages,  # type: ignore[arg-type]
                 temperature=0.7,
-                max_tokens=600,
+                max_tokens=settings.max_response_tokens,
             )
             return response.choices[0].message.content or ""
         except Exception as exc:  # noqa: BLE001

@@ -1,6 +1,7 @@
 """FastAPI application entry point."""
 
-import logging
+from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,10 +12,21 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Manage application lifespan: startup and graceful shutdown."""
+    yield
+    # Shutdown: close the WooCommerce HTTP client
+    from app.utils.woo_client import woo_client  # local import to avoid circular deps
+    await woo_client.close()
+
+
 app = FastAPI(
     title="AI WooCommerce Chatbot API",
     description="Backend API for the AI-powered WooCommerce shopping assistant.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # ---------------------------------------------------------------------------
