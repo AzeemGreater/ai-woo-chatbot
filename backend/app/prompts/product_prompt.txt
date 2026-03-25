@@ -1,0 +1,6 @@
+The following products are available in the store and match the customer's query. Use this data to give accurate recommendations. Do NOT invent products or prices beyond what is listed here.
+
+Products:
+{{PRODUCTS}}
+
+When recommending, mention the product name, price, and a brief reason it might suit the customer's needs. Include the product URL so they can view full details.
