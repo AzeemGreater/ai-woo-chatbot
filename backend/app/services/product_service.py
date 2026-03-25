@@ -41,7 +41,10 @@ def _parse_product(raw: dict[str, Any]) -> ProductSchema:
         rating_count=int(raw.get("rating_count", 0)),
         variations=[],  # fetched separately when needed
         attributes={
-            attr["name"]: [o["name"] for o in attr.get("options", [])]
+            attr["name"]: [
+                o["name"] if isinstance(o, dict) else str(o)
+                for o in attr.get("options", [])
+            ]
             for attr in raw.get("attributes", [])
         },
     )

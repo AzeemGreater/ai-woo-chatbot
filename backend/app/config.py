@@ -29,5 +29,9 @@ class Settings(BaseSettings):
     # CORS origins (comma-separated)
     allowed_origins: str = "*"
 
+    # AI response tuning
+    max_history_messages: int = 10
+    max_response_tokens: int = 800
+
 
 settings = Settings()

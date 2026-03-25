@@ -182,7 +182,7 @@
 
     var div = document.createElement('div');
     div.className = 'aiwc-msg aiwc-msg-bot';
-    div.textContent = text;
+    div.innerHTML = simpleMarkdown(text);
 
     wrap.appendChild(avatar);
     wrap.appendChild(div);
@@ -211,7 +211,7 @@
           '<a href="' + escAttr(card.permalink) + '" class="aiwc-product-name" target="_blank" rel="noopener">' + escHtml(card.name) + '</a>' +
           '<span class="aiwc-product-price">' + escHtml(card.price) + '</span>' +
           (card.in_stock
-            ? '<button class="aiwc-add-to-cart-btn" data-product-id="' + escAttr(String(card.id)) + '">🛒 Add to Cart</button>'
+            ? '<button class="aiwc-add-to-cart-btn" role="button" aria-label="Add ' + escAttr(card.name) + ' to cart" data-product-id="' + escAttr(String(card.id)) + '">🛒 Add to Cart</button>'
             : '<span class="aiwc-out-of-stock">Out of Stock</span>') +
           '<a href="' + escAttr(card.permalink) + '" class="aiwc-view-details" target="_blank" rel="noopener">View Details →</a>' +
         '</div>';
@@ -237,6 +237,8 @@
       var btn = document.createElement('button');
       btn.className = 'aiwc-qr-btn';
       btn.textContent = qr.label;
+      btn.setAttribute('role', 'button');
+      btn.setAttribute('aria-label', qr.label);
       btn.addEventListener('click', function () {
         sendMessage(qr.payload);
       });
@@ -283,7 +285,28 @@
       .then(function (data) {
         if (data.success) {
           btn.textContent = '✅ Added!';
-          appendBotMessage('Added to your cart! 🎉 <a href="' + (data.cart_url || '/cart') + '">View Cart →</a>', []);
+          // Build the "Added to cart" message using DOM API to avoid XSS
+          var cartUrl = data.cart_url || '/cart';
+          var msgText = 'Added to your cart! 🎉 ';
+          var link = document.createElement('a');
+          link.href = cartUrl;
+          link.textContent = 'View Cart →';
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          var wrap = document.createElement('div');
+          wrap.className = 'aiwc-msg-wrap';
+          var avatarEl = document.createElement('img');
+          avatarEl.src = AVATAR_URL;
+          avatarEl.alt = BOT_NAME;
+          avatarEl.className = 'aiwc-msg-avatar';
+          var msgDiv = document.createElement('div');
+          msgDiv.className = 'aiwc-msg aiwc-msg-bot';
+          msgDiv.textContent = msgText;
+          msgDiv.appendChild(link);
+          wrap.appendChild(avatarEl);
+          wrap.appendChild(msgDiv);
+          messagesDiv.appendChild(wrap);
+          scrollToBottom();
         } else {
           btn.textContent = '❌ Failed';
           btn.disabled = false;
@@ -337,6 +360,29 @@
 
   function escAttr(str) {
     return escHtml(str);
+  }
+
+  /**
+   * Convert a small subset of Markdown to safe HTML for bot messages.
+   * Supports: **bold**, *italic*, [text](url) links, and newlines.
+   * All text content is escaped before transformation so no user-supplied
+   * HTML can leak through.
+   */
+  function simpleMarkdown(text) {
+    // Escape all HTML first to prevent XSS
+    var safe = escHtml(String(text));
+    // **bold**
+    safe = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // *italic* — use negative lookahead/lookbehind to skip double-asterisk bold markers
+    safe = safe.replace(/(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+    // [text](url) — only allow http/https URLs
+    safe = safe.replace(
+      /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>'
+    );
+    // Line breaks
+    safe = safe.replace(/\n/g, '<br>');
+    return safe;
   }
 
   // -------------------------------------------------------------------------
