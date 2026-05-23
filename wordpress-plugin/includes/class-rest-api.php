@@ -70,11 +70,13 @@ class AIWC_REST_API {
 
 	/** Forward the chat message to the Python backend and return the response. */
 	public function handle_chat( WP_REST_Request $request ): WP_REST_Response|WP_Error {
-		$backend_url = trailingslashit( aiwc()->settings->get( 'backend_url', '' ) ) . 'api/v1/chat';
+		$backend_base = aiwc()->settings->get( 'backend_url', '' );
 
-		if ( empty( $backend_url ) || $backend_url === 'api/v1/chat' ) {
+		if ( empty( $backend_base ) ) {
 			return new WP_Error( 'backend_not_configured', __( 'Backend API URL is not configured.', 'ai-woo-chatbot' ), array( 'status' => 503 ) );
 		}
+
+		$backend_url = trailingslashit( $backend_base ) . 'api/v1/chat';
 
 		$payload = array(
 			'session_id'         => $request->get_param( 'session_id' ),

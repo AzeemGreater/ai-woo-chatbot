@@ -283,7 +283,20 @@
       .then(function (data) {
         if (data.success) {
           btn.textContent = '✅ Added!';
-          appendBotMessage('Added to your cart! 🎉 <a href="' + (data.cart_url || '/cart') + '">View Cart →</a>', []);
+          var cartUrl = escAttr(data.cart_url || '/cart');
+          var msg = document.createElement('div');
+          msg.className = 'aiwc-msg-wrap';
+          var avatar = document.createElement('img');
+          avatar.src = AVATAR_URL;
+          avatar.alt = BOT_NAME;
+          avatar.className = 'aiwc-msg-avatar';
+          var bubble = document.createElement('div');
+          bubble.className = 'aiwc-msg aiwc-msg-bot';
+          bubble.innerHTML = 'Added to your cart! 🎉 <a href="' + cartUrl + '" target="_blank" rel="noopener">View Cart →</a>';
+          msg.appendChild(avatar);
+          msg.appendChild(bubble);
+          messagesDiv.appendChild(msg);
+          scrollToBottom();
         } else {
           btn.textContent = '❌ Failed';
           btn.disabled = false;

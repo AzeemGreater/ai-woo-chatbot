@@ -14,10 +14,11 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     session_id: str = Field(..., min_length=1, max_length=128)
     message: str = Field(..., min_length=1, max_length=2000)
-    history: list[ChatMessage] = Field(default_factory=list)
+    # Cap history at 40 entries (~20 turns) to prevent token exhaustion attacks.
+    history: list[ChatMessage] = Field(default_factory=list, max_length=40)
     # Optional context injected by the WordPress plugin
     current_product_id: Optional[int] = None
-    cart_items: list[dict[str, Any]] = Field(default_factory=list)
+    cart_items: list[dict[str, Any]] = Field(default_factory=list, max_length=50)
 
 
 class QuickReply(BaseModel):

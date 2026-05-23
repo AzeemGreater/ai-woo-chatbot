@@ -61,7 +61,7 @@ class ProductService:
         on_sale: bool = False,
     ) -> list[ProductSchema]:
         cache_key = f"products:search:{keyword}:{category}:{min_price}:{max_price}:{per_page}:{featured}:{on_sale}"
-        cached = get_cache(cache_key)
+        cached = await get_cache(cache_key)
         if cached:
             return [ProductSchema(**p) for p in cached]
 
@@ -88,12 +88,12 @@ class ProductService:
             return []
 
         products = [_parse_product(p) for p in raw_list]
-        set_cache(cache_key, [p.model_dump() for p in products], ttl=_CACHE_TTL)
+        await set_cache(cache_key, [p.model_dump() for p in products], ttl=_CACHE_TTL)
         return products
 
     async def get_by_id(self, product_id: int) -> Optional[ProductSchema]:
         cache_key = f"products:id:{product_id}"
-        cached = get_cache(cache_key)
+        cached = await get_cache(cache_key)
         if cached:
             return ProductSchema(**cached)
 
@@ -103,12 +103,12 @@ class ProductService:
             return None
 
         product = _parse_product(raw)
-        set_cache(cache_key, product.model_dump(), ttl=_CACHE_TTL)
+        await set_cache(cache_key, product.model_dump(), ttl=_CACHE_TTL)
         return product
 
     async def get_categories(self) -> list[dict[str, Any]]:
         cache_key = "products:categories"
-        cached = get_cache(cache_key)
+        cached = await get_cache(cache_key)
         if cached:
             return cached
 
@@ -118,7 +118,7 @@ class ProductService:
             return []
 
         cats = [{"id": c["id"], "name": c["name"], "slug": c["slug"]} for c in raw]
-        set_cache(cache_key, cats, ttl=_CACHE_TTL)
+        await set_cache(cache_key, cats, ttl=_CACHE_TTL)
         return cats
 
     async def _resolve_category_id(self, category_name: str) -> Optional[int]:

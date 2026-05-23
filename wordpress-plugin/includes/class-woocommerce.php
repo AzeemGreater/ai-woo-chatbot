@@ -43,6 +43,7 @@ class AIWC_WooCommerce {
 
 		if ( ! empty( $args['category'] ) ) {
 			$query_args['tax_query'] = array(
+				'relation' => 'AND',
 				array(
 					'taxonomy' => 'product_cat',
 					'field'    => 'slug',
@@ -52,6 +53,9 @@ class AIWC_WooCommerce {
 		}
 
 		if ( $args['featured'] ) {
+			if ( ! isset( $query_args['tax_query'] ) ) {
+				$query_args['tax_query'] = array( 'relation' => 'AND' );
+			}
 			$query_args['tax_query'][] = array(
 				'taxonomy' => 'product_visibility',
 				'field'    => 'name',
