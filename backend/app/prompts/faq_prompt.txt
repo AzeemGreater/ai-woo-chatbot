@@ -1,0 +1,4 @@
+The following information was found in our FAQ knowledge base and is relevant to the customer's question. Use it to craft a clear, helpful response. If it doesn't fully answer their question, say so and offer further assistance.
+
+FAQ Answer:
+{{FAQ_ANSWER}}

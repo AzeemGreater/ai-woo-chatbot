@@ -1,0 +1,52 @@
+[
+  {
+    "question": "What is your return policy?",
+    "keywords": ["return", "refund", "exchange", "policy"],
+    "answer": "We offer a 30-day hassle-free return policy. Items must be unused and in their original packaging. To initiate a return, please contact our support team with your order number."
+  },
+  {
+    "question": "How long does shipping take?",
+    "keywords": ["shipping", "delivery", "arrive", "ship", "time", "days"],
+    "answer": "Standard shipping typically takes 5–7 business days. Express shipping (2–3 business days) is available at checkout. Free shipping applies on orders over $50."
+  },
+  {
+    "question": "What payment methods do you accept?",
+    "keywords": ["payment", "pay", "credit", "card", "paypal", "visa", "mastercard"],
+    "answer": "We accept Visa, MasterCard, American Express, PayPal, Apple Pay, and Google Pay. All transactions are secured with SSL encryption."
+  },
+  {
+    "question": "How do I track my order?",
+    "keywords": ["track", "order", "status", "where", "package"],
+    "answer": "You can track your order by providing your order number and billing email address to me. Alternatively, check the order confirmation email for a tracking link."
+  },
+  {
+    "question": "Do you ship internationally?",
+    "keywords": ["international", "worldwide", "country", "overseas", "abroad"],
+    "answer": "Yes, we ship to over 50 countries worldwide. International shipping rates and delivery times vary by destination and are calculated at checkout."
+  },
+  {
+    "question": "How do I cancel my order?",
+    "keywords": ["cancel", "cancellation", "stop", "undo"],
+    "answer": "Orders can be cancelled within 2 hours of placement. Please contact our support team immediately with your order number. Once an order has shipped, it cannot be cancelled — please use the returns process instead."
+  },
+  {
+    "question": "Is my personal information secure?",
+    "keywords": ["secure", "privacy", "data", "personal", "safe", "gdpr"],
+    "answer": "Absolutely. We use industry-standard SSL encryption and comply with GDPR. We never sell or share your personal data with third parties. Read our full privacy policy on the website."
+  },
+  {
+    "question": "How do I contact customer support?",
+    "keywords": ["contact", "support", "help", "human", "agent", "email", "phone"],
+    "answer": "You can reach our support team via email at support@store.com, by phone at 1-800-SHOPBOT, or through the live chat on our website. Support is available Monday–Friday, 9am–5pm EST."
+  },
+  {
+    "question": "Do you offer gift wrapping?",
+    "keywords": ["gift", "wrap", "wrapping", "present"],
+    "answer": "Yes! We offer gift wrapping for a small additional fee. You can select this option during checkout and add a personalised message."
+  },
+  {
+    "question": "What is your price match guarantee?",
+    "keywords": ["price", "match", "cheaper", "discount", "guarantee", "beat"],
+    "answer": "We offer a price match guarantee. If you find an identical product cheaper at another authorised retailer, contact us with the link and we'll match the price."
+  }
+]
